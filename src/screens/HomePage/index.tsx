@@ -131,32 +131,53 @@ const HomePage = () => {
         ],
       });
 
-      refreshAccountData(selectedAccount);
+      const transactionInterval = setInterval(async () => {
+        const transactionReceipt = await window.ethereum.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+        });
+
+        if (transactionReceipt) {
+          clearInterval(transactionInterval);
+          refreshAccountData(selectedAccount);
+          handleShowSnackbar(`Transaction succeeded`);
+        }
+      }, 500);
 
       reset();
-      handleShowSnackbar(`Transaction success id: ${txHash}`);
+      handleShowSnackbar(
+        `Transaction is processing id: ${txHash}`,
+        "warning",
+        6000
+      );
     } catch (error: any) {
       handleShowSnackbar(error.message, "error");
     }
   }
 
-  function handleShowSnackbar(msg: string, variant: VariantType = "success") {
-    enqueueSnackbar(msg, { variant });
+  function handleShowSnackbar(
+    msg: string,
+    variant: VariantType = "success",
+    autoHideDuration: number = 3000
+  ) {
+    enqueueSnackbar(msg, { variant, autoHideDuration });
+  }
+
+  function handleAccountChanged(accounts: any) {
+    refreshAccountData(accounts[0]);
   }
 
   useEffect(() => {
     if (providers.length > 0) {
       getAccounts();
-    }
-  }, [providers]);
 
-  useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts: any) => {
-        refreshAccountData(accounts[0]);
-      });
+      window.ethereum.on("accountsChanged", handleAccountChanged);
     }
-  });
+
+    return () => {
+      window.ethereum.removeListener("accountsChanged", handleAccountChanged);
+    };
+  }, [providers]);
 
   if (isNotConnected) {
     return (
