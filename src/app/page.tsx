@@ -1,5 +1,5 @@
 "use client";
-import HomePage from "@/pages/HomePage";
+import HomePage from "@/screens/HomePage";
 import { SnackbarProvider } from "notistack";
 
 export default function Home() {
