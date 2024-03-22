@@ -1,3 +1,7 @@
+interface Window {
+  ethereum: any;
+}
+
 interface EIP6963ProviderDetail {
   info: EIP6963ProviderInfo;
   provider: EIP1193Provider;
